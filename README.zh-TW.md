@@ -58,10 +58,10 @@ Session Guard 提供：
 pi -e ./src/index.ts
 ```
 
-### 方案 B：作為套件安裝（發佈後）
+### 方案 B：從 npm 安裝
 
 ```bash
-pi install npm:<your-package>
+pi install npm:pi-session-guard
 ```
 
 ---
@@ -105,19 +105,19 @@ pi install npm:<your-package>
 
 ### 1) 可以看到當前空間狀況（`/session-guard scan`）
 
-![掃描總覽](docs/images/scan.webp)
+![掃描總覽](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/scan.png)
 
 ### 2) 刪除前可先預覽 session 內容（在清理列表按 `p`）
 
-![刪除前預覽](docs/images/clean-preview.webp)
+![刪除前預覽](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/clean-preview.png)
 
 ### 3) 支援多選後一次刪除
 
-![多選清理](docs/images/clean.webp)
+![多選清理](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/clean.png)
 
 ### 4) 超過 quota 後會阻擋一般訊息發送
 
-![超額阻擋](docs/images/quota-exceed.webp)
+![超額阻擋](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/quota-exceed.png)
 
 ---
 

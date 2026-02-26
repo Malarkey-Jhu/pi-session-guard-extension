@@ -58,10 +58,10 @@ Deletion flow:
 pi -e ./src/index.ts
 ```
 
-### Option B: Install as a package (when published)
+### Option B: Install from npm
 
 ```bash
-pi install npm:<your-package>
+pi install npm:pi-session-guard
 ```
 
 ---
@@ -105,19 +105,19 @@ In cleanup list:
 
 ### 1) See current storage usage (`/session-guard scan`)
 
-![Scan overview](docs/images/scan.webp)
+![Scan overview](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/scan.png)
 
 ### 2) Preview a session before deleting (`p` in cleanup list)
 
-![Cleanup preview](docs/images/clean-preview.webp)
+![Cleanup preview](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/clean-preview.png)
 
 ### 3) Multi-select and delete in one cleanup run
 
-![Cleanup multi-select](docs/images/clean.webp)
+![Cleanup multi-select](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/clean.png)
 
 ### 4) Quota exceeded blocks normal chat input
 
-![Quota exceeded guard](docs/images/quota-exceed.webp)
+![Quota exceeded guard](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/quota-exceed.png)
 
 ---
 
