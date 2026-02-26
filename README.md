@@ -1,60 +1,99 @@
-# Pi Session Retention Extension
+# Pi Session Guard Extension
 
-Manage and retain local Pi sessions safely to prevent disk bloat.
+A Pi extension for **managing local sessions safely** with a focus on:
 
-中文說明請見：[`README.zh-TW.md`](./README.zh-TW.md)
+- visibility (how much space sessions use)
+- manual cleanup (safe, review-first deletion)
+- quota guardrails (warn/block when disk usage is too high)
 
 ---
 
-## Overview
+## Why this exists
 
-Pi stores sessions as local JSONL files (default: `~/.pi/agent/sessions`).
-Over time, these files can grow quickly and consume a lot of disk space.
+Pi stores sessions as local JSONL files (`~/.pi/agent/sessions`).
+For heavy users, these files can grow quickly and cause disk pressure.
 
-This extension focuses on:
+`session-guard` helps you:
 
-- Session visibility (count, size, largest files)
-- Safe cleanup workflows (soft-delete first)
-- Retention policies (size/count/age based)
-- Quota warnings and optional hard-block mode
+1. understand what sessions consume space,
+2. review before deleting,
+3. prevent runaway growth with quota warnings/guard.
 
-## Current Status
+---
 
-Planning phase (spec + tasks):
+## Core behavior (MVP)
 
-- `spec.md`: Product/technical specification
-- `tasks.md`: Implementation checklist and milestones
+- **Global-only scan/clean** (no scope switching)
+- Session list uses **first user message summary** (not raw JSONL filename)
+- Cleanup is **manual** and **soft-delete first** (`trash` then quarantine fallback)
+- Quota is **size-only** and set by command
+- Quota states:
+  - `ok`
+  - `info`
+  - `warn` (>= 90%)
+  - `critical` (>= 100%, blocks normal chat input)
 
-## Planned Features (V1)
+In `critical`, unlock commands are still allowed:
 
-- Scan and summarize session storage usage
-- Sort sessions by LRU / size / age
-- Manual cleanup wizard with confirmation
-- Soft-delete by default (trash/quarantine)
-- Protect important sessions from deletion
-- Quota states: info / warn / critical
+- `/session-guard scan`
+- `/session-guard clean`
+- `/session-guard quota set <size>`
 
-## Safety Principles
+---
 
-- No auto-delete by default
-- Auto-clean is opt-in
-- Auto-clean only performs soft-delete in V1
-- Never delete active session
-- Keep recent sessions and protected sessions
+## Commands
 
-## Roadmap
+- `/session-guard scan [--sort size|lru]`
+- `/session-guard clean`
+- `/session-guard quota set <size>`
 
-- M1: Scan + summary + sorting + command skeleton
-- M2: Manual cleanup + soft-delete + protect
-- M3: Quota status + policy UI/commands
-- M4: Auto-clean (opt-in) + optional hard-block
+Examples:
 
-## Development and Packaging
+- `/session-guard quota set 10GB`
+- `/session-guard scan`
+- `/session-guard clean`
 
-This repository now uses a publish-friendly layout:
+---
 
-- `src/index.ts`: main extension entry (used for packaging)
-- `.pi/extensions/session-retention/index.ts`: local dev loader (re-export for `/reload` convenience)
+## Quota config file
 
-For local development, run pi in this repo and use `/reload`.
-For package distribution, the `pi` manifest in `package.json` points to `./src/index.ts`.
+You do **not** need to create config manually.
+
+When you run:
+
+- `/session-guard quota set <size>`
+
+the extension auto-creates/updates:
+
+- `~/.pi/agent/session-guard.json`
+
+---
+
+## Development
+
+Project layout:
+
+- `src/index.ts` - extension entry
+- `src/session.ts` - session discovery + title extraction
+- `src/clean.ts` - cleanup UI + soft-delete flow
+- `src/quota.ts` - quota config/state/guard logic
+- `src/report.ts` - scan report formatting
+- `src/renderer.ts` - custom report renderer
+- `src/args.ts`, `src/actions.ts`, `src/types.ts`, `src/utils.ts` - supporting modules
+
+Local run:
+
+1. Run Pi in this repository
+2. Use `/reload` after code changes
+
+Packaging:
+
+- `package.json` → `pi.extensions` points to `./src/index.ts`
+
+---
+
+## Docs
+
+- Spec: `spec.md`
+- Tasks: `tasks.md`
+- Chinese README: `README.zh-TW.md`

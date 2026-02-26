@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Local Pi runtime/dev files
+.pi/
+
+# OS/editor
+.DS_Store
+*.log

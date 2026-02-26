@@ -36,7 +36,7 @@ export async function runScan(
   const report = buildReport(sessionRootDir, sessions, sort, quotaSummary);
 
   ctx.ui.notify(`Scanned ${sessions.length} session files (global, sort=${sort})`, "info");
-  pi.sendMessage({ customType: "session-retention-report", content: report, display: true });
+  pi.sendMessage({ customType: "session-guard-report", content: report, display: true });
 
   return quotaSummary;
 }
@@ -51,15 +51,15 @@ export async function runQuotaSet(
   const summary = await loadQuotaSummary(sessionRootDir);
 
   const lines: string[] = [];
-  lines.push("Session Retention Quota Updated");
+  lines.push("Session Guard Quota Updated");
   lines.push(`Quota: ${formatBytes(sizeBytes)} (${sizeBytes} bytes)`);
   lines.push(`Used: ${formatBytes(summary.totalSizeBytes)} (${summary.totalSizeBytes} bytes)`);
   lines.push(`Usage: ${formatPercent(summary.usageRatio)}`);
   lines.push(`State: ${summary.state.toUpperCase()}`);
   if (summary.state === "warn" || summary.state === "critical") {
-    lines.push("Advice: Run /session-retention clean to free space");
+    lines.push("Advice: Run /session-guard clean to free space");
   }
 
-  pi.sendMessage({ customType: "session-retention-report", content: lines.join("\n"), display: true });
+  pi.sendMessage({ customType: "session-guard-report", content: lines.join("\n"), display: true });
   return summary;
 }

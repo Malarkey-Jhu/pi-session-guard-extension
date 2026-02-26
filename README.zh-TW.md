@@ -1,60 +1,101 @@
-# Pi Session Retention Extension
+# Pi Session Guard Extension
 
-安全管理 Pi 本地 session，避免磁碟空間爆炸。
+一個用來**安全管理 Pi 本地 session**的 extension，核心重點：
 
-English README: [`README.md`](./README.md)
+- 可視化（session 佔多少空間）
+- 手動清理（刪除前可檢視）
+- Quota 防護（接近上限警告、超額阻擋）
 
 ---
 
-## 專案說明
+## 這個 extension 解決什麼問題
 
-Pi 會把對話 session 以 JSONL 檔案儲存在本地（預設：`~/.pi/agent/sessions`）。
-長期使用下，session 容量會快速成長，可能導致磁碟空間壓力。
+Pi 會把對話 session 儲存在本機 JSONL（`~/.pi/agent/sessions`）。
+長期使用後，session 檔案會持續變大，容易造成磁碟壓力。
 
-本 extension 目標：
+`session-guard` 讓你可以：
 
-- 提供 session 可視化（數量、容量、最大檔案）
-- 提供安全清理流程（預設 soft-delete）
-- 提供 retention policy（依容量/數量/時間）
-- 提供 quota 提示與可選 hard-block
+1. 看清楚空間是被哪些 session 佔用，
+2. 先看內容再決定是否刪除，
+3. 用 quota 控制成長風險。
 
-## 目前進度
+---
 
-目前在規劃階段（已完成規格與任務拆解）：
+## 目前 MVP 行為
 
-- `spec.md`：產品與技術規格
-- `tasks.md`：開發 checklist 與里程碑
+- **只支援 global 掃描/清理**（不切 scope）
+- session 顯示採用**第一個 user 訊息摘要**（不是 jsonl 檔名）
+- 清理為**手動流程**，且預設 **soft-delete**（先 trash，失敗才 quarantine）
+- quota 目前只管「容量大小」
+- quota 狀態：
+  - `ok`
+  - `info`
+  - `warn`（>= 90%）
+  - `critical`（>= 100%，阻擋一般對話輸入）
 
-## 預計功能（V1）
+`critical` 狀態仍可執行解鎖命令：
 
-- 掃描並統計 session 空間使用
-- 依 LRU / 大小 / 時間排序 session
-- 手動清理精靈（含確認流程）
-- 預設 soft-delete（trash/quarantine）
-- 保護重要 session 避免誤刪
-- quota 狀態：info / warn / critical
+- `/session-guard scan`
+- `/session-guard clean`
+- `/session-guard quota set <size>`
 
-## 安全原則
+---
 
-- 預設不自動刪除
-- auto-clean 必須明確啟用
-- V1 的 auto-clean 僅 soft-delete
-- 永不刪除 active session
-- 保留最近與受保護 session
+## 使用方式
 
-## 路線圖
+### Commands
 
-- M1: 掃描統計 + 排序 + 命令骨架
-- M2: 手動清理 + soft-delete + protect
-- M3: quota 狀態提示 + policy 命令
-- M4: auto-clean（opt-in）+ hard-block（可選）
+- `/session-guard scan [--sort size|lru]`
+- `/session-guard clean`
+- `/session-guard quota set <size>`
 
-## 開發與發佈結構
+### 範例
 
-此 repo 現在使用可發佈的目錄結構：
+- `/session-guard quota set 10GB`
+- `/session-guard scan --sort lru`
+- `/session-guard clean`
 
-- `src/index.ts`：extension 主入口（發佈使用）
-- `.pi/extensions/session-retention/index.ts`：本地開發載入器（re-export，方便 `/reload`）
+---
 
-本地開發可直接在此 repo 執行 pi 並使用 `/reload`。
-未來發佈時，`package.json` 的 `pi.extensions` 已指向 `./src/index.ts`。
+## Quota 設定檔
+
+你**不需要**手動建立設定檔。
+
+當你執行：
+
+- `/session-guard quota set <size>`
+
+extension 會自動建立/更新：
+
+- `~/.pi/agent/session-guard.json`
+
+---
+
+## 開發說明
+
+主要檔案：
+
+- `src/index.ts`：extension 入口（事件與命令路由）
+- `src/session.ts`：session 掃描與摘要提取
+- `src/clean.ts`：清理 UI 與 soft-delete 流程
+- `src/quota.ts`：quota 設定、狀態、輸入阻擋
+- `src/report.ts`：scan 報表格式化
+- `src/renderer.ts`：客製訊息渲染
+- `src/args.ts`、`src/actions.ts`、`src/types.ts`、`src/utils.ts`：支援模組
+
+本地開發：
+
+1. 在此 repo 啟動 Pi
+2. 修改後執行 `/reload`
+
+封裝入口：
+
+- `package.json` 的 `pi.extensions` 指向 `./src/index.ts`
+
+---
+
+## 相關文件
+
+- 規格：`spec.md`
+- 任務拆解：`tasks.md`
+- English README：`README.md`

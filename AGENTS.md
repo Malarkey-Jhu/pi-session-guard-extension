@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository.
 
 ## Project
 
-- Name: `pi-session-retention-extension`
+- Name: `pi-session-guard-extension`
 - Purpose: Session management extension for Pi coding agent
 - Current focus: **MVP** (manual cleanup + quota governance)
 
@@ -13,7 +13,7 @@ Guidance for coding agents working in this repository.
 1. `scan` and `clean` are **global-only** (no scope switch).
 2. Session rows show **summary from first user message** (not jsonl filename).
 3. Quota is **size-only** via:
-   - `/session-retention quota set <size>`
+   - `/session-guard quota set <size>`
 4. Quota behavior:
    - warn at >= 90%
    - block normal chat at >= 100% (critical)
@@ -21,9 +21,9 @@ Guidance for coding agents working in this repository.
 
 ## Commands
 
-- `/session-retention scan [--sort size|lru]`
-- `/session-retention clean`
-- `/session-retention quota set <size>`
+- `/session-guard scan [--sort size|lru]`
+- `/session-guard clean`
+- `/session-guard quota set <size>`
 
 ## UX Notes
 

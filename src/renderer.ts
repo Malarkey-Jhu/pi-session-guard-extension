@@ -6,15 +6,15 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Box, Text } from "@mariozechner/pi-tui";
 
 export function registerReportRenderer(pi: ExtensionAPI): void {
-  pi.registerMessageRenderer("session-retention-report", (message, _options, theme) => {
+  pi.registerMessageRenderer("session-guard-report", (message, _options, theme) => {
     const raw = typeof message.content === "string" ? message.content : "";
     const styled = raw
       .split("\n")
       .map((line) => {
         if (
-          line === "Session Retention Scan" ||
-          line === "Session Retention Cleanup Result" ||
-          line === "Session Retention Quota Updated"
+          line === "Session Guard Scan" ||
+          line === "Session Guard Cleanup Result" ||
+          line === "Session Guard Quota Updated"
         ) {
           return `${theme.fg("accent", "◉")} ${theme.fg("accent", theme.bold(line))}`;
         }

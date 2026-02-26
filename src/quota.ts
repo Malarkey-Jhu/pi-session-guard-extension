@@ -141,12 +141,12 @@ export async function loadQuotaSummary(sessionDir: string): Promise<QuotaSummary
 export function isAllowedCriticalInput(text: string): boolean {
   const normalized = normalizeInputText(text);
   if (normalized === "/help") return true;
-  if (!normalized.startsWith("/session-retention")) return false;
+  if (!normalized.startsWith("/session-guard")) return false;
 
   return (
-    normalized === "/session-retention" ||
-    normalized.startsWith("/session-retention scan") ||
-    normalized.startsWith("/session-retention clean") ||
-    normalized.startsWith("/session-retention quota set")
+    normalized === "/session-guard" ||
+    normalized.startsWith("/session-guard scan") ||
+    normalized.startsWith("/session-guard clean") ||
+    normalized.startsWith("/session-guard quota set")
   );
 }

@@ -12,7 +12,7 @@ import { formatBytes, formatPercent } from "./utils";
 /**
  * Extension entry: wires renderer, events, and slash commands.
  */
-export default function sessionRetentionExtension(pi: ExtensionAPI): void {
+export default function sessionGuardExtension(pi: ExtensionAPI): void {
   let lastWarnNotificationAt = 0;
   let quotaCache:
     | {
@@ -54,7 +54,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
     applyQuotaStatus(ctx, summary);
     if (summary.configured && summary.state === "warn") {
       ctx.ui.notify(
-        `Session storage at ${formatPercent(summary.usageRatio)} (${formatBytes(summary.totalSizeBytes)} / ${formatBytes(summary.quotaBytes ?? 0)}). Consider /session-retention clean`,
+        `Session storage at ${formatPercent(summary.usageRatio)} (${formatBytes(summary.totalSizeBytes)} / ${formatBytes(summary.quotaBytes ?? 0)}). Consider /session-guard clean`,
         "warning",
       );
       lastWarnNotificationAt = Date.now();
@@ -73,7 +73,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
       if (isAllowedCriticalInput(event.text)) return { action: "continue" } as const;
 
       ctx.ui.notify(
-        `Session quota exceeded (${formatPercent(summary.usageRatio)}). Run /session-retention clean or /session-retention quota set <size>`,
+        `Session quota exceeded (${formatPercent(summary.usageRatio)}). Run /session-guard clean or /session-guard quota set <size>`,
         "error",
       );
       return { action: "handled" } as const;
@@ -82,7 +82,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
     if (summary.state === "warn") {
       const now = Date.now();
       if (now - lastWarnNotificationAt > WARN_NOTIFY_COOLDOWN_MS) {
-        ctx.ui.notify(`Session storage warning: ${formatPercent(summary.usageRatio)} used. Run /session-retention clean`, "warning");
+        ctx.ui.notify(`Session storage warning: ${formatPercent(summary.usageRatio)} used. Run /session-guard clean`, "warning");
         lastWarnNotificationAt = now;
       }
     }
@@ -90,7 +90,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
     return { action: "continue" } as const;
   });
 
-  pi.registerCommand("session-retention", {
+  pi.registerCommand("session-guard", {
     description: "Session management (global scan, global clean, quota set <size>)",
     handler: async (args, ctx) => {
       const command = (args ?? "").trim().split(/\s+/).filter(Boolean)[0] ?? "scan";
@@ -101,7 +101,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
       if (command === "scan") {
         const parsed = parseScanArgs(args);
         if (!parsed.isScanCommand) {
-          ctx.ui.notify("Unknown subcommand. Use /session-retention scan [--sort size|lru]", "warning");
+          ctx.ui.notify("Unknown subcommand. Use /session-guard scan [--sort size|lru]", "warning");
           return;
         }
         if (parsed.error) {
@@ -118,7 +118,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
       if (command === "clean") {
         const parsed = parseCleanArgs(args);
         if (!parsed.isCleanCommand) {
-          ctx.ui.notify("Unknown subcommand. Use /session-retention clean", "warning");
+          ctx.ui.notify("Unknown subcommand. Use /session-guard clean", "warning");
           return;
         }
         if (parsed.error) {
@@ -135,7 +135,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
       if (command === "quota") {
         const parsed = parseQuotaArgs(args);
         if (!parsed.isQuotaCommand) {
-          ctx.ui.notify("Unknown quota command. Use /session-retention quota set <size>", "warning");
+          ctx.ui.notify("Unknown quota command. Use /session-guard quota set <size>", "warning");
           return;
         }
         if (parsed.error || !parsed.sizeBytes) {
@@ -153,7 +153,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
         return;
       }
 
-      ctx.ui.notify("Unknown subcommand. Use /session-retention scan, /session-retention clean, or /session-retention quota set <size>", "warning");
+      ctx.ui.notify("Unknown subcommand. Use /session-guard scan, /session-guard clean, or /session-guard quota set <size>", "warning");
     },
   });
 }

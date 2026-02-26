@@ -17,7 +17,7 @@ export function buildReport(
   const topLargest = sortSessions(sessions, sort).slice(0, 10);
 
   const lines: string[] = [];
-  lines.push("Session Retention Scan");
+  lines.push("Session Guard Scan");
   lines.push(`Sort: ${sort}`);
   lines.push(`Session dir: ${sessionDir}`);
   lines.push(`Total sessions: ${totalSessions}`);
@@ -29,11 +29,11 @@ export function buildReport(
     lines.push(`Usage: ${formatPercent(quotaSummary.usageRatio)}`);
     lines.push(`State: ${quotaSummary.state.toUpperCase()}`);
     if (quotaSummary.state === "warn" || quotaSummary.state === "critical") {
-      lines.push("Advice: Run /session-retention clean to free space");
+      lines.push("Advice: Run /session-guard clean to free space");
     }
   } else {
     lines.push("Quota: (not set)");
-    lines.push("Advice: Use /session-retention quota set <size>");
+    lines.push("Advice: Use /session-guard quota set <size>");
   }
 
   lines.push("");

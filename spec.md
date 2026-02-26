@@ -1,4 +1,4 @@
-# Pi Extension Spec: Session Retention Manager (MVP)
+# Pi Extension Spec: Session Guard Manager (MVP)
 
 ## 1) 背景與問題
 
@@ -45,7 +45,7 @@ Pi 會把 session 存成本地 JSONL（預設 `~/.pi/agent/sessions`）。長期
 
 ### 4.2 手動清理（維持現有）
 
-- `/session-retention clean`
+- `/session-guard clean`
 - 多選候選 + 預估釋放空間
 - 預設 soft delete（trash -> quarantine fallback）
 - active session 永不刪除
@@ -67,17 +67,17 @@ Pi 會把 session 存成本地 JSONL（預設 `~/.pi/agent/sessions`）。長期
 
 唯一設定入口：
 
-- `/session-retention quota set <size>`
+- `/session-guard quota set <size>`
 
 範例：
 
-- `/session-retention quota set 10GB`
-- `/session-retention quota set 500MB`
+- `/session-guard quota set 10GB`
+- `/session-guard quota set 500MB`
 
 行為：
 
 1. 解析 size（支援 B/KB/MB/GB/TB）
-2. 寫入設定檔 `~/.pi/agent/session-retention.json`
+2. 寫入設定檔 `~/.pi/agent/session-guard.json`
 3. 立即重新計算目前使用率並回報狀態
 
 ### 4.5 進入對話提示與阻擋
@@ -87,9 +87,9 @@ Pi 會把 session 存成本地 JSONL（預設 `~/.pi/agent/sessions`）。長期
 
 在 `critical` 時，必須放行以下命令避免鎖死：
 
-- `/session-retention scan`
-- `/session-retention clean`
-- `/session-retention quota set ...`
+- `/session-guard scan`
+- `/session-guard clean`
+- `/session-guard quota set ...`
 - `/help`
 
 ---
@@ -98,22 +98,22 @@ Pi 會把 session 存成本地 JSONL（預設 `~/.pi/agent/sessions`）。長期
 
 ### 5.1 Commands
 
-- `/session-retention scan [--sort size|lru]`
-- `/session-retention clean`
-- `/session-retention quota set <size>`
+- `/session-guard scan [--sort size|lru]`
+- `/session-guard clean`
+- `/session-guard quota set <size>`
 
 ### 5.2 Scan 顯示（新增）
 
 - `Quota: 10.00 GB`
 - `Used: 9.21 GB (92.1%)`
 - `State: WARN`
-- 建議文案：`Run /session-retention clean to free space`
+- 建議文案：`Run /session-guard clean to free space`
 
 ---
 
 ## 6) 設定檔（MVP）
 
-路徑：`~/.pi/agent/session-retention.json`
+路徑：`~/.pi/agent/session-guard.json`
 
 ```json
 {
@@ -129,8 +129,8 @@ Pi 會把 session 存成本地 JSONL（預設 `~/.pi/agent/sessions`）。長期
 
 ## 7) 驗收標準（MVP AC）
 
-1. 可透過 `/session-retention quota set <size>` 設定容量上限
-2. `/session-retention scan` 可顯示 quota、使用率%、狀態
+1. 可透過 `/session-guard quota set <size>` 設定容量上限
+2. `/session-guard scan` 可顯示 quota、使用率%、狀態
 3. 使用率 >=90% 會提示清理
 4. 使用率 >=100% 會阻擋一般對話輸入
 5. `critical` 狀態下仍可使用 retention 相關命令完成解鎖

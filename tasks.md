@@ -1,4 +1,4 @@
-# Session Retention Manager - Tasks (MVP)
+# Session Guard Manager - Tasks (MVP)
 
 ## 0) 目標定義（本輪）
 
@@ -10,12 +10,12 @@
 
 ## 1) Quota 設定（唯一入口）
 
-- [ ] 新增命令：`/session-retention quota set <size>`
+- [ ] 新增命令：`/session-guard quota set <size>`
 - [ ] 支援 size parser：`B | KB | MB | GB | TB`（大小寫皆可）
 - [ ] 輸入驗證：
   - [ ] 格式錯誤時提示可用範例（如 `10GB`, `500MB`）
   - [ ] 數值需 > 0
-- [ ] 寫入設定檔：`~/.pi/agent/session-retention.json`
+- [ ] 寫入設定檔：`~/.pi/agent/session-guard.json`
 - [ ] 設定後立即重算並回覆目前使用率與狀態
 
 **完成定義**：可成功 set quota，重啟後設定仍存在。
@@ -47,10 +47,10 @@
   - [ ] Usage ratio（百分比）
   - [ ] State（ok/info/warn/critical）
 - [ ] 依狀態加入提示文案：
-  - [ ] warn/critical 顯示 `Run /session-retention clean`
+  - [ ] warn/critical 顯示 `Run /session-guard clean`
 - [ ] renderer 加上狀態顏色（accent/warning）
 
-**完成定義**：`/session-retention scan` 可直接用於容量決策。
+**完成定義**：`/session-guard scan` 可直接用於容量決策。
 
 ---
 
@@ -69,9 +69,9 @@
 - [ ] 監聽 `input` event
 - [ ] `critical` 時阻擋一般 prompt
 - [ ] 放行白名單命令：
-  - [ ] `/session-retention scan`
-  - [ ] `/session-retention clean`
-  - [ ] `/session-retention quota set ...`
+  - [ ] `/session-guard scan`
+  - [ ] `/session-guard clean`
+  - [ ] `/session-guard quota set ...`
   - [ ] `/help`
 - [ ] 阻擋文案需清楚告知解鎖路徑（clean 或提高 quota）
 - [ ] fail-open 防呆：guard 例外時至少保證可執行 retention 命令
@@ -111,7 +111,7 @@
 
 ## 8) MVP 驗收清單
 
-- [ ] AC1: `/session-retention quota set <size>` 可設定且持久化
+- [ ] AC1: `/session-guard quota set <size>` 可設定且持久化
 - [ ] AC2: scan 顯示 quota/使用率/狀態
 - [ ] AC3: >=90% 會提示
 - [ ] AC4: >=100% 阻擋一般對話

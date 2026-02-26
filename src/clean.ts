@@ -310,7 +310,7 @@ async function chooseCleanupCandidates(ctx: ExtensionCommandContext, candidates:
         const lines: string[] = [];
         const summary = getSelectedSummary();
 
-        lines.push(theme.fg("accent", theme.bold("Session Retention Cleanup")));
+        lines.push(theme.fg("accent", theme.bold("Session Guard Cleanup")));
         lines.push(theme.fg("dim", "↑/↓ move  •  space toggle  •  a all/none  •  p preview  •  enter confirm  •  esc cancel"));
         lines.push(theme.fg("warning", "[×] locked: active session cannot be deleted"));
         lines.push(theme.fg("muted", "Selected: ") + theme.fg("text", `${summary.count} files, ${formatBytes(summary.bytes)}`));
@@ -450,7 +450,7 @@ export async function runClean(
   }
 
   const lines: string[] = [];
-  lines.push("Session Retention Cleanup Result");
+  lines.push("Session Guard Cleanup Result");
   lines.push(`Deleted: ${successCount}/${selectedSessions.length}`);
   lines.push(`Freed: ${formatBytes(freedBytes)} (${freedBytes} bytes)`);
   lines.push(`Methods: trash=${trashedCount}, quarantine=${quarantinedCount}`);
@@ -461,7 +461,7 @@ export async function runClean(
     if (failures.length > 5) lines.push(`... ${failures.length - 5} more`);
   }
 
-  pi.sendMessage({ customType: "session-retention-report", content: lines.join("\n"), display: true });
+  pi.sendMessage({ customType: "session-guard-report", content: lines.join("\n"), display: true });
 
   if (failedCount > 0) ctx.ui.notify(`Cleanup finished with ${failedCount} failure(s)`, "warning");
   else ctx.ui.notify(`Cleanup completed. Freed ${formatBytes(freedBytes)}`, "info");

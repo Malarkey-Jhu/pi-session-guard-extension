@@ -1,5 +1,5 @@
 /**
- * Filesystem path helpers for agent/session-retention data.
+ * Filesystem path helpers for agent/session-guard data.
  */
 
 import os from "node:os";
@@ -14,5 +14,5 @@ export function getFallbackSessionDir(): string {
 }
 
 export function getQuotaConfigPath(): string {
-  return path.join(getAgentDir(), "session-retention.json");
+  return path.join(getAgentDir(), "session-guard.json");
 }

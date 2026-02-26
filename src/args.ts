@@ -75,9 +75,9 @@ export function parseCleanArgs(args: string | undefined): ParsedCleanArgs {
   if (tokens.length > 1) {
     const token = tokens[1]!;
     if (token.startsWith("--")) {
-      return { isCleanCommand: true, error: `Unknown option: ${token}. Use /session-retention clean` };
+      return { isCleanCommand: true, error: `Unknown option: ${token}. Use /session-guard clean` };
     }
-    return { isCleanCommand: true, error: `Unknown argument: ${token}. Use /session-retention clean` };
+    return { isCleanCommand: true, error: `Unknown argument: ${token}. Use /session-guard clean` };
   }
 
   return { isCleanCommand: true };
@@ -94,12 +94,12 @@ export function parseQuotaArgs(args: string | undefined): ParsedQuotaArgs {
   }
 
   if (tokens[1] !== "set") {
-    return { isQuotaCommand: true, error: "Unknown quota command. Use /session-retention quota set <size>" };
+    return { isQuotaCommand: true, error: "Unknown quota command. Use /session-guard quota set <size>" };
   }
 
   const sizeRaw = tokens.slice(2).join("");
   if (!sizeRaw) {
-    return { isQuotaCommand: true, error: "Missing size. Example: /session-retention quota set 10GB" };
+    return { isQuotaCommand: true, error: "Missing size. Example: /session-guard quota set 10GB" };
   }
 
   const sizeBytes = parseSizeToBytes(sizeRaw);

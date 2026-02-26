@@ -1,5 +1,5 @@
 /**
- * Shared domain types for session retention commands, quota, scan, and cleanup.
+ * Shared domain types for session guard commands, quota, scan, and cleanup.
  */
 
 export type SortMode = "size" | "lru";

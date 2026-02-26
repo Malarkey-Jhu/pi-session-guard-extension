@@ -1,14 +1,14 @@
 {
-  "name": "pi-session-retention-extension",
+  "name": "pi-session-guard-extension",
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Session retention management extension for Pi coding agent",
+  "description": "Session guard extension for Pi coding agent",
   "keywords": [
     "pi-package",
     "pi-extension",
     "session",
-    "retention"
+    "guard"
   ],
   "pi": {
     "extensions": [
