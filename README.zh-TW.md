@@ -49,6 +49,12 @@ Pi 會把對話 session 以 JSONL 檔案儲存在本地（預設：`~/.pi/agent/
 - M3: quota 狀態提示 + policy 命令
 - M4: auto-clean（opt-in）+ hard-block（可選）
 
-## 備註
+## 開發與發佈結構
 
-目前此 repo 以規劃文件為主，下一步會加入 extension 的實作程式碼。
+此 repo 現在使用可發佈的目錄結構：
+
+- `src/index.ts`：extension 主入口（發佈使用）
+- `.pi/extensions/session-retention/index.ts`：本地開發載入器（re-export，方便 `/reload`）
+
+本地開發可直接在此 repo 執行 pi 並使用 `/reload`。
+未來發佈時，`package.json` 的 `pi.extensions` 已指向 `./src/index.ts`。

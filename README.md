@@ -49,7 +49,12 @@ Planning phase (spec + tasks):
 - M3: Quota status + policy UI/commands
 - M4: Auto-clean (opt-in) + optional hard-block
 
-## Notes
+## Development and Packaging
 
-This repository currently contains design docs and task plans.
-Implementation files for the Pi extension will be added next.
+This repository now uses a publish-friendly layout:
+
+- `src/index.ts`: main extension entry (used for packaging)
+- `.pi/extensions/session-retention/index.ts`: local dev loader (re-export for `/reload` convenience)
+
+For local development, run pi in this repo and use `/reload`.
+For package distribution, the `pi` manifest in `package.json` points to `./src/index.ts`.
