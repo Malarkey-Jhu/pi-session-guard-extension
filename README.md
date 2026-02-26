@@ -1,106 +1,119 @@
 # Pi Session Guard Extension
 
-A Pi extension for **managing local sessions safely** with a focus on:
-
-- visibility (how much space sessions use)
-- manual cleanup (safe, review-first deletion)
-- quota guardrails (warn/block when disk usage is too high)
+Keep Pi session storage under control with a **safe, manual-first cleanup workflow** and **quota guardrails**.
 
 ---
 
-## Why this exists
+## Why this extension?
 
-Pi stores sessions as local JSONL files (`~/.pi/agent/sessions`).
-For heavy users, these files can grow quickly and cause disk pressure.
+Pi stores conversations as local JSONL files in:
 
-`session-guard` helps you:
+- `~/.pi/agent/sessions`
 
-1. understand what sessions consume space,
-2. review before deleting,
-3. prevent runaway growth with quota warnings/guard.
+Heavy usage can grow this folder quickly. Without guardrails, disk usage can become a problem.
+
+Session Guard helps by providing:
+
+- clear storage visibility (size + top sessions)
+- review-before-delete cleanup flow
+- quota warning and hard-stop behavior
 
 ---
 
-## Core behavior (MVP)
+## Key behaviors (MVP)
 
-- **Global-only scan/clean** (no scope switching)
-- Session list uses **first user message summary** (not raw JSONL filename)
-- Cleanup is **manual** and **soft-delete first**:
-  - First try system `trash` (recoverable from Trash)
-  - If trash is unavailable, move to quarantine as fallback
-- Quota is **size-only** and set by command
-- Quota states:
-  - `ok`
-  - `info`
-  - `warn` (>= 90%)
-  - `critical` (>= 100%)
+- Global scan/cleanup (default Pi session path: `~/.pi/agent/sessions`)
+- Session label uses the **first user message** (not raw filename)
+- Cleanup is **manual** and **soft-delete first**
+- Quota is size-based (`ok`, `info`, `warn`, `critical`)
 
-### Key differentiators
+### 1) Quota hard-stop at 100%
 
-1. **Quota hard stop at 100%**: when quota reaches/exceeds 100%, normal chat input is blocked.
-2. **Safe cleanup by default**: deletion is soft-delete first, so users can recover via Trash in normal environments.
+When usage reaches/exceeds 100% (`critical`), normal chat input is blocked until you clean up or raise quota.
 
-In `critical`, unlock commands are still allowed:
+Allowed commands in critical mode:
 
 - `/session-guard scan`
 - `/session-guard clean`
 - `/session-guard quota set <size>`
+- `/help`
+
+### 2) Soft-delete by default (recoverable)
+
+Cleanup does **not** hard-delete by default.
+
+Deletion flow:
+
+1. Move to system Trash first (recoverable)
+2. If Trash is unavailable, move to fallback folder:
+   - `~/.pi/agent/session-trash`
 
 ---
 
-## Commands
+## Install
 
-- `/session-guard scan [--sort size|lru]`
-- `/session-guard clean`
-- `/session-guard quota set <size>`
+### Option A: Run from this repository (local/dev)
 
-Examples:
+```bash
+pi -e ./src/index.ts
+```
 
-- `/session-guard quota set 10GB`
-- `/session-guard scan`
-- `/session-guard clean`
+### Option B: Install as a package (when published)
+
+```bash
+pi install npm:<your-package>
+```
 
 ---
 
-## Quota config file
+## Usage
 
-You do **not** need to create config manually.
+### Set quota (auto-creates config)
 
-When you run:
+```bash
+/session-guard quota set 10GB
+```
 
-- `/session-guard quota set <size>`
+Supported units: `B`, `KB`, `MB`, `GB`, `TB`.
 
-the extension auto-creates/updates:
+This command automatically creates/updates:
 
 - `~/.pi/agent/session-guard.json`
+
+### Scan
+
+```bash
+/session-guard scan
+/session-guard scan --sort lru
+```
+
+### Clean
+
+```bash
+/session-guard clean
+```
+
+In cleanup list:
+
+- `p` to preview selected session (user + assistant messages only)
+- `space` to select/unselect
+- `enter` to confirm selection
 
 ---
 
 ## Development
 
-Project layout:
+Main modules:
 
-- `src/index.ts` - extension entry
-- `src/session.ts` - session discovery + title extraction
+- `src/index.ts` - extension entry (events + command routing)
+- `src/session.ts` - session scan + title extraction
 - `src/clean.ts` - cleanup UI + soft-delete flow
-- `src/quota.ts` - quota config/state/guard logic
+- `src/quota.ts` - quota config/state/input guard
 - `src/report.ts` - scan report formatting
-- `src/renderer.ts` - custom report renderer
-- `src/args.ts`, `src/actions.ts`, `src/types.ts`, `src/utils.ts` - supporting modules
+- `src/renderer.ts` - custom message rendering
 
-Local run:
+For detailed plan and acceptance criteria:
 
-1. Run Pi in this repository
-2. Use `/reload` after code changes
-
-Packaging:
-
-- `package.json` → `pi.extensions` points to `./src/index.ts`
-
----
-
-## Docs
-
-- Spec: `spec.md`
-- Tasks: `tasks.md`
+- `spec.md`
+- `tasks.md`
 - Chinese README: `README.zh-TW.md`

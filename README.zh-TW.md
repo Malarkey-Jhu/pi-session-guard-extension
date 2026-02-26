@@ -1,108 +1,119 @@
 # Pi Session Guard Extension
 
-一個用來**安全管理 Pi 本地 session**的 extension，核心重點：
-
-- 可視化（session 佔多少空間）
-- 手動清理（刪除前可檢視）
-- Quota 防護（接近上限警告、超額阻擋）
+用 **安全、手動優先** 的方式管理 Pi session 空間，並用 quota 防止磁碟失控。
 
 ---
 
-## 這個 extension 解決什麼問題
+## 為什麼需要這個 extension？
 
-Pi 會把對話 session 儲存在本機 JSONL（`~/.pi/agent/sessions`）。
-長期使用後，session 檔案會持續變大，容易造成磁碟壓力。
+Pi 會把對話記錄成 JSONL，存放在：
 
-`session-guard` 讓你可以：
+- `~/.pi/agent/sessions`
 
-1. 看清楚空間是被哪些 session 佔用，
-2. 先看內容再決定是否刪除，
-3. 用 quota 控制成長風險。
+重度使用下，這個目錄會快速膨脹。沒有治理機制時，很容易吃滿磁碟。
+
+Session Guard 提供：
+
+- 空間可視化（總量與大檔）
+- 刪除前可檢視內容
+- quota 告警與硬性阻擋
 
 ---
 
 ## 目前 MVP 行為
 
-- **只支援 global 掃描/清理**（不切 scope）
-- session 顯示採用**第一個 user 訊息摘要**（不是 jsonl 檔名）
-- 清理為**手動流程**，且預設 **soft-delete**：
-  - 優先送到系統 `trash`（可從垃圾桶復原）
-  - 若無法使用 trash，再 fallback 到 quarantine
-- quota 目前只管「容量大小」
-- quota 狀態：
-  - `ok`
-  - `info`
-  - `warn`（>= 90%）
-  - `critical`（>= 100%）
+- 掃描與清理以全域 session 為主（Pi 預設 session 路徑：`~/.pi/agent/sessions`）
+- session 標題採用**第一個 user 訊息摘要**（不是檔名）
+- 清理是**手動流程**，且預設 **soft-delete**
+- quota 目前只管容量（`ok` / `info` / `warn` / `critical`）
 
-### 兩個關鍵特點
+### 1) 100% quota 會阻擋一般輸入
 
-1. **100% 會硬性阻擋一般對話輸入**：達到/超過 quota 後，不能繼續正常聊天，必須先處理容量。
-2. **預設安全刪除**：先 soft-delete，正常環境可從垃圾桶救回，降低誤刪風險。
+當使用率達到或超過 100%（`critical`），一般對話會被阻擋；需先清理或調高 quota。
 
-`critical` 狀態仍可執行解鎖命令：
+`critical` 狀態仍可執行：
 
 - `/session-guard scan`
 - `/session-guard clean`
 - `/session-guard quota set <size>`
+- `/help`
+
+### 2) 預設 soft-delete（可恢復）
+
+清理預設不做硬刪除。
+
+刪除流程：
+
+1. 先移到系統垃圾桶（可恢復）
+2. 若垃圾桶不可用，改移到 fallback 目錄：
+   - `~/.pi/agent/session-trash`
+
+---
+
+## 安裝
+
+### 方案 A：從此 repo 直接執行（本地/開發）
+
+```bash
+pi -e ./src/index.ts
+```
+
+### 方案 B：作為套件安裝（發佈後）
+
+```bash
+pi install npm:<your-package>
+```
 
 ---
 
 ## 使用方式
 
-### Commands
+### 設定 quota（會自動建立設定檔）
 
-- `/session-guard scan [--sort size|lru]`
-- `/session-guard clean`
-- `/session-guard quota set <size>`
+```bash
+/session-guard quota set 10GB
+```
 
-### 範例
+支援單位：`B`、`KB`、`MB`、`GB`、`TB`。
 
-- `/session-guard quota set 10GB`
-- `/session-guard scan --sort lru`
-- `/session-guard clean`
-
----
-
-## Quota 設定檔
-
-你**不需要**手動建立設定檔。
-
-當你執行：
-
-- `/session-guard quota set <size>`
-
-extension 會自動建立/更新：
+此命令會自動建立/更新：
 
 - `~/.pi/agent/session-guard.json`
 
+### 掃描
+
+```bash
+/session-guard scan
+/session-guard scan --sort lru
+```
+
+### 清理
+
+```bash
+/session-guard clean
+```
+
+在 cleanup 列表中：
+
+- `p`：預覽目前游標 session（只顯示 user + assistant）
+- `space`：勾選/取消
+- `enter`：確認選取並進入刪除確認
+
 ---
 
-## 開發說明
+## 開發
 
-主要檔案：
+主要模組：
 
 - `src/index.ts`：extension 入口（事件與命令路由）
-- `src/session.ts`：session 掃描與摘要提取
+- `src/session.ts`：session 掃描與標題提取
 - `src/clean.ts`：清理 UI 與 soft-delete 流程
 - `src/quota.ts`：quota 設定、狀態、輸入阻擋
 - `src/report.ts`：scan 報表格式化
 - `src/renderer.ts`：客製訊息渲染
-- `src/args.ts`、`src/actions.ts`、`src/types.ts`、`src/utils.ts`：支援模組
 
-本地開發：
+詳細規格與任務：
 
-1. 在此 repo 啟動 Pi
-2. 修改後執行 `/reload`
-
-封裝入口：
-
-- `package.json` 的 `pi.extensions` 指向 `./src/index.ts`
-
----
-
-## 相關文件
-
-- 規格：`spec.md`
-- 任務拆解：`tasks.md`
+- `spec.md`
+- `tasks.md`
 - English README：`README.md`
