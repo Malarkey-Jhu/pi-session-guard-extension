@@ -1,5 +1,5 @@
 {
-  "name": "pi-session-guard-extension",
+  "name": "pi-session-guard",
   "version": "0.1.0",
   "private": false,
   "type": "module",

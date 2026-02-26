@@ -105,19 +105,19 @@ In cleanup list:
 
 ### 1) See current storage usage (`/session-guard scan`)
 
-![Scan overview](docs/images/scan.png)
+![Scan overview](docs/images/scan.webp)
 
 ### 2) Preview a session before deleting (`p` in cleanup list)
 
-![Cleanup preview](docs/images/clean-preview.png)
+![Cleanup preview](docs/images/clean-preview.webp)
 
 ### 3) Multi-select and delete in one cleanup run
 
-![Cleanup multi-select](docs/images/clean.png)
+![Cleanup multi-select](docs/images/clean.webp)
 
 ### 4) Quota exceeded blocks normal chat input
 
-![Quota exceeded guard](docs/images/quota-exceed.png)
+![Quota exceeded guard](docs/images/quota-exceed.webp)
 
 ---
 

@@ -105,19 +105,19 @@ pi install npm:<your-package>
 
 ### 1) 可以看到當前空間狀況（`/session-guard scan`）
 
-![掃描總覽](docs/images/scan.png)
+![掃描總覽](docs/images/scan.webp)
 
 ### 2) 刪除前可先預覽 session 內容（在清理列表按 `p`）
 
-![刪除前預覽](docs/images/clean-preview.png)
+![刪除前預覽](docs/images/clean-preview.webp)
 
 ### 3) 支援多選後一次刪除
 
-![多選清理](docs/images/clean.png)
+![多選清理](docs/images/clean.webp)
 
 ### 4) 超過 quota 後會阻擋一般訊息發送
 
-![超額阻擋](docs/images/quota-exceed.png)
+![超額阻擋](docs/images/quota-exceed.webp)
 
 ---
 
