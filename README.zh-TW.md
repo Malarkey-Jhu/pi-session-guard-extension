@@ -25,13 +25,20 @@ Pi 會把對話 session 儲存在本機 JSONL（`~/.pi/agent/sessions`）。
 
 - **只支援 global 掃描/清理**（不切 scope）
 - session 顯示採用**第一個 user 訊息摘要**（不是 jsonl 檔名）
-- 清理為**手動流程**，且預設 **soft-delete**（先 trash，失敗才 quarantine）
+- 清理為**手動流程**，且預設 **soft-delete**：
+  - 優先送到系統 `trash`（可從垃圾桶復原）
+  - 若無法使用 trash，再 fallback 到 quarantine
 - quota 目前只管「容量大小」
 - quota 狀態：
   - `ok`
   - `info`
   - `warn`（>= 90%）
-  - `critical`（>= 100%，阻擋一般對話輸入）
+  - `critical`（>= 100%）
+
+### 兩個關鍵特點
+
+1. **100% 會硬性阻擋一般對話輸入**：達到/超過 quota 後，不能繼續正常聊天，必須先處理容量。
+2. **預設安全刪除**：先 soft-delete，正常環境可從垃圾桶救回，降低誤刪風險。
 
 `critical` 狀態仍可執行解鎖命令：
 

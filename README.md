@@ -25,13 +25,20 @@ For heavy users, these files can grow quickly and cause disk pressure.
 
 - **Global-only scan/clean** (no scope switching)
 - Session list uses **first user message summary** (not raw JSONL filename)
-- Cleanup is **manual** and **soft-delete first** (`trash` then quarantine fallback)
+- Cleanup is **manual** and **soft-delete first**:
+  - First try system `trash` (recoverable from Trash)
+  - If trash is unavailable, move to quarantine as fallback
 - Quota is **size-only** and set by command
 - Quota states:
   - `ok`
   - `info`
   - `warn` (>= 90%)
-  - `critical` (>= 100%, blocks normal chat input)
+  - `critical` (>= 100%)
+
+### Key differentiators
+
+1. **Quota hard stop at 100%**: when quota reaches/exceeds 100%, normal chat input is blocked.
+2. **Safe cleanup by default**: deletion is soft-delete first, so users can recover via Trash in normal environments.
 
 In `critical`, unlock commands are still allowed:
 
