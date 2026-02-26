@@ -20,7 +20,7 @@ Session Guard helps by providing:
 
 ---
 
-## Key behaviors (MVP)
+## Key behaviors
 
 - Global scan/cleanup (default Pi session path: `~/.pi/agent/sessions`)
 - Session label uses the **first user message** (not raw filename)
@@ -98,6 +98,26 @@ In cleanup list:
 - `p` to preview selected session (user + assistant messages only)
 - `space` to select/unselect
 - `enter` to confirm selection
+
+---
+
+## Screenshots
+
+### 1) See current storage usage (`/session-guard scan`)
+
+![Scan overview](docs/images/scan.png)
+
+### 2) Preview a session before deleting (`p` in cleanup list)
+
+![Cleanup preview](docs/images/clean-preview.png)
+
+### 3) Multi-select and delete in one cleanup run
+
+![Cleanup multi-select](docs/images/clean.png)
+
+### 4) Quota exceeded blocks normal chat input
+
+![Quota exceeded guard](docs/images/quota-exceed.png)
 
 ---
 

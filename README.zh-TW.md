@@ -20,7 +20,7 @@ Session Guard 提供：
 
 ---
 
-## 目前 MVP 行為
+## 目前行為
 
 - 掃描與清理以全域 session 為主（Pi 預設 session 路徑：`~/.pi/agent/sessions`）
 - session 標題採用**第一個 user 訊息摘要**（不是檔名）
@@ -98,6 +98,26 @@ pi install npm:<your-package>
 - `p`：預覽目前游標 session（只顯示 user + assistant）
 - `space`：勾選/取消
 - `enter`：確認選取並進入刪除確認
+
+---
+
+## 截圖說明
+
+### 1) 可以看到當前空間狀況（`/session-guard scan`）
+
+![掃描總覽](docs/images/scan.png)
+
+### 2) 刪除前可先預覽 session 內容（在清理列表按 `p`）
+
+![刪除前預覽](docs/images/clean-preview.png)
+
+### 3) 支援多選後一次刪除
+
+![多選清理](docs/images/clean.png)
+
+### 4) 超過 quota 後會阻擋一般訊息發送
+
+![超額阻擋](docs/images/quota-exceed.png)
 
 ---
 
