@@ -43,12 +43,17 @@ Pi 將 session 以 JSONL 儲存在本地（預設 `~/.pi/agent/sessions`），�
 
 ### 5.1 Session 掃描與統計
 
-- 掃描 session root（預設 `~/.pi/agent/sessions`；支援自訂）
+- 掃描支援兩種 scope：
+  - `current`：僅當前工作目錄 namespace 的 sessions（預設）
+  - `global`：`~/.pi/agent/sessions` 底下所有 namespace
 - 聚合指標：
   - session 檔案總數
-  - 總大小（bytes / human readable）
+  - 總大小（bytes / human readable，以 `stat.size` 為主）
   - Top-N 最大檔案
-  - 每個工作目錄 namespace 的占用
+  - 每個工作目錄 namespace 的占用（global scope 必顯示）
+- 實作建議：
+  - 以 Node `fs.stat` 掃描 `.jsonl` 為主（跨平台與可維護）
+  - `du` 可作為後續補充指標（磁碟 block usage），非 V1 主依據
 
 ### 5.2 Session 列表與排序
 
@@ -135,6 +140,9 @@ V1 先用 deterministic 排序（LRU -> size -> path），避免黑箱分數。
    - 列出前 5 個最大風險目標
 5. 支援 `dry-run`
 6. 操作可審計：記錄 cleanup log（時間、目標、釋放空間、執行模式）
+7. 跨 namespace 清理需額外防護：
+   - 預設僅清理 current scope
+   - global scope 下的刪除需顯式確認（提示涉及多個 namespace）
 
 ---
 
@@ -142,8 +150,9 @@ V1 先用 deterministic 排序（LRU -> size -> path），避免黑箱分數。
 
 ### 9.1 Commands
 
-- `/session-retention`：開啟總覽面板
-- `/session-retention scan`：重新掃描
+- `/session-retention`：開啟總覽面板（預設 current scope）
+- `/session-retention scan`：重新掃描（current scope）
+- `/session-retention scan --global`：掃描全域所有 namespace
 - `/session-retention clean`：進入清理精靈
 - `/session-retention policy`：設定保留策略
 - `/session-retention protect <sessionId|path>`：保護某 session
@@ -222,6 +231,7 @@ V1 先用 deterministic 排序（LRU -> size -> path），避免黑箱分數。
 4. 啟用 quota 後，在 70/90/100% 出現對應提示
 5. 啟用 hard-block 時，超額會攔截一般輸入並引導清理
 6. 當前 active session 永不會被刪除
+7. 支援 current/global 兩種掃描範圍，且 global 可顯示 namespace 占用
 
 ---
 
@@ -241,6 +251,9 @@ V1 先用 deterministic 排序（LRU -> size -> path），避免黑箱分數。
 
 5. **V1 先採全域 quota，不做 per-project hard limit**  
    - V1.1 可增加 per-project 告警與觀測，V2 再評估雙層配額治理。
+
+6. **V1 提供雙掃描視角：current（預設）與 global（全域）**  
+   - current 用於日常管理；global 用於整體容量治理與觀測。
 
 ---
 

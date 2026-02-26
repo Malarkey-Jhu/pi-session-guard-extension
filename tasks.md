@@ -41,7 +41,9 @@
 
 ## 2) Session 掃描器（M1）
 
-- [ ] 掃描 `sessionDir` 下所有 `.jsonl`
+- [ ] 實作掃描範圍（scope）：
+  - [ ] `current`：當前工作目錄 namespace
+  - [ ] `global`：`sessionDir` 下所有 `.jsonl`
 - [ ] 建立 `SessionMeta`：
   - [ ] `path`
   - [ ] `sizeBytes`
@@ -55,7 +57,7 @@
   - [ ] `totalSessions`
   - [ ] `totalSizeBytes`
   - [ ] `topLargest[]`
-  - [ ] `byNamespace[]`
+  - [ ] `byNamespace[]`（global scope 必填，current 可選）
 - [ ] 加入基本快取（避免每次命令都全量掃描）
 
 **完成定義**：`/session-retention scan` 可顯示總數、總大小、Top-N。
@@ -81,8 +83,9 @@
 
 ## 4) 命令骨架（M1）
 
-- [ ] `/session-retention`：顯示總覽
-- [ ] `/session-retention scan`：強制重掃
+- [ ] `/session-retention`：顯示總覽（current）
+- [ ] `/session-retention scan`：強制重掃（current）
+- [ ] `/session-retention scan --global`
 - [ ] `/session-retention clean`：啟動清理流程（先文字版）
 - [ ] `/session-retention policy`：顯示目前政策
 - [ ] `/session-retention protect <id|path>`
@@ -98,6 +101,7 @@
 - [ ] 支援多選候選
 - [ ] 顯示預估可釋放空間
 - [ ] 二次確認（顯示刪除數量、容量、示例檔案）
+- [ ] 若為 global scope，顯示涉及 namespace 清單並要求額外確認
 - [ ] 執行刪除前再驗證（避免 race condition）
 
 ### 5.1 Soft Delete（M2 核心）
@@ -229,3 +233,4 @@
 - [ ] AC4: 70/90/100% 提示正確
 - [ ] AC5: hard-block 超額攔截並引導清理
 - [ ] AC6: active session 永不刪除
+- [ ] AC7: 支援 current/global 掃描且 global 顯示 namespace 占用
