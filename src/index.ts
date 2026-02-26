@@ -5,6 +5,7 @@ import path from "node:path";
 import os from "node:os";
 
 type ScanScope = "current" | "global";
+type SortMode = "size" | "lru";
 
 type SessionFileMeta = {
   path: string;
@@ -175,21 +176,29 @@ function buildNamespaceStats(sessions: SessionFileMeta[]): NamespaceStat[] {
   return [...map.values()].sort((a, b) => b.sizeBytes - a.sizeBytes);
 }
 
+function sortSessions(sessions: SessionFileMeta[], sort: SortMode): SessionFileMeta[] {
+  if (sort === "lru") {
+    return [...sessions].sort((a, b) => a.mtimeMs - b.mtimeMs || b.sizeBytes - a.sizeBytes || a.path.localeCompare(b.path));
+  }
+
+  return [...sessions].sort((a, b) => b.sizeBytes - a.sizeBytes || b.mtimeMs - a.mtimeMs || a.path.localeCompare(b.path));
+}
+
 function buildReport(
   sessionDir: string,
   sessions: SessionFileMeta[],
   scope: ScanScope,
   currentNamespace: string,
+  sort: SortMode,
 ): string {
   const totalSessions = sessions.length;
   const totalSizeBytes = sessions.reduce((acc, s) => acc + s.sizeBytes, 0);
-  const topLargest = [...sessions]
-    .sort((a, b) => b.sizeBytes - a.sizeBytes || b.mtimeMs - a.mtimeMs)
-    .slice(0, 10);
+  const topLargest = sortSessions(sessions, sort).slice(0, 10);
 
   const lines: string[] = [];
   lines.push("Session Retention Scan");
   lines.push(`Scope: ${scope}`);
+  lines.push(`Sort: ${sort}`);
   lines.push(`Session dir: ${sessionDir}`);
   if (scope === "current") {
     lines.push(`Namespace: ${currentNamespace}`);
@@ -226,7 +235,7 @@ function buildReport(
     return lines.join("\n");
   }
 
-  lines.push("Top 10 largest session files:");
+  lines.push(sort === "lru" ? "Top 10 least recently updated sessions:" : "Top 10 largest session files:");
   if (scope === "global") {
     const header =
       `${pad("#", 3, "right")}  ${pad("Size", 10, "right")}  ${pad("Updated", 16)}  ${pad("State", 8)}  ` +
@@ -263,39 +272,84 @@ function buildReport(
   return lines.join("\n");
 }
 
-function parseScanScope(args: string | undefined): { scope: ScanScope; isScanCommand: boolean; error?: string } {
+type ParsedScanArgs = {
+  scope: ScanScope;
+  sort: SortMode;
+  isScanCommand: boolean;
+  error?: string;
+};
+
+function parseScanArgs(args: string | undefined): ParsedScanArgs {
   const tokens = (args ?? "")
     .trim()
     .split(/\s+/)
     .filter(Boolean);
 
   if (tokens.length === 0) {
-    return { scope: "current", isScanCommand: true };
+    return { scope: "current", sort: "size", isScanCommand: true };
   }
 
   if (tokens[0] !== "scan") {
-    return { scope: "current", isScanCommand: false };
+    return { scope: "current", sort: "size", isScanCommand: false };
   }
 
-  const flags = tokens.slice(1);
-  if (flags.length === 0) {
-    return { scope: "current", isScanCommand: true };
-  }
+  let scope: ScanScope = "current";
+  let sort: SortMode = "size";
 
-  const unknownFlag = flags.find((f) => f.startsWith("--") && f !== "--global");
-  if (unknownFlag) {
+  for (let i = 1; i < tokens.length; i++) {
+    const token = tokens[i]!;
+
+    if (token === "--global") {
+      scope = "global";
+      continue;
+    }
+
+    if (token === "--sort") {
+      const next = tokens[i + 1];
+      if (!next) {
+        return {
+          scope,
+          sort,
+          isScanCommand: true,
+          error: "Missing value for --sort. Supported: size | lru",
+        };
+      }
+
+      if (next !== "size" && next !== "lru") {
+        return {
+          scope,
+          sort,
+          isScanCommand: true,
+          error: `Invalid --sort value: ${next}. Supported: size | lru`,
+        };
+      }
+
+      sort = next;
+      i += 1;
+      continue;
+    }
+
+    if (token.startsWith("--")) {
+      return {
+        scope,
+        sort,
+        isScanCommand: true,
+        error: `Unknown option: ${token}. Supported: --global, --sort <size|lru>`,
+      };
+    }
+
     return {
-      scope: "current",
+      scope,
+      sort,
       isScanCommand: true,
-      error: `Unknown option: ${unknownFlag}. Supported: --global`,
+      error: `Unknown argument: ${token}. Supported: --global, --sort <size|lru>`,
     };
   }
 
-  const scope: ScanScope = flags.includes("--global") ? "global" : "current";
-  return { scope, isScanCommand: true };
+  return { scope, sort, isScanCommand: true };
 }
 
-async function runScan(pi: ExtensionAPI, ctx: ExtensionCommandContext, scope: ScanScope): Promise<void> {
+async function runScan(pi: ExtensionAPI, ctx: ExtensionCommandContext, scope: ScanScope, sort: SortMode): Promise<void> {
   const { sessionRootDir, currentNamespace } = resolveSessionLocation(ctx);
   const activeSessionFile = ctx.sessionManager.getSessionFile();
 
@@ -307,9 +361,9 @@ async function runScan(pi: ExtensionAPI, ctx: ExtensionCommandContext, scope: Sc
   }
 
   const sessions = await scanSessions(sessionRootDir, activeSessionFile, scope, currentNamespace);
-  const report = buildReport(sessionRootDir, sessions, scope, currentNamespace);
+  const report = buildReport(sessionRootDir, sessions, scope, currentNamespace, sort);
 
-  ctx.ui.notify(`Scanned ${sessions.length} session files (${scope})`, "info");
+  ctx.ui.notify(`Scanned ${sessions.length} session files (${scope}, sort=${sort})`, "info");
 
   pi.sendMessage({
     customType: "session-retention-report",
@@ -333,6 +387,11 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
           return `${theme.fg("muted", "Scope:")} ${theme.fg("accent", theme.bold(value))}`;
         }
 
+        if (line.startsWith("Sort:")) {
+          const value = line.slice("Sort:".length).trim();
+          return `${theme.fg("muted", "Sort:")} ${theme.fg("accent", value)}`;
+        }
+
         if (line.startsWith("Session dir:")) {
           const value = line.slice("Session dir:".length).trim();
           return `${theme.fg("muted", "Session dir:")} ${theme.fg("dim", value)}`;
@@ -353,7 +412,11 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
           return `${theme.fg("muted", "Total size:")} ${theme.fg("text", theme.bold(value))}`;
         }
 
-        if (line === "Top namespaces by size:" || line === "Top 10 largest session files:") {
+        if (
+          line === "Top namespaces by size:" ||
+          line === "Top 10 largest session files:" ||
+          line === "Top 10 least recently updated sessions:"
+        ) {
           const title = line.slice(0, -1);
           return theme.fg("accent", theme.bold(title)) + theme.fg("dim", ":");
         }
@@ -372,12 +435,12 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
   });
 
   pi.registerCommand("session-retention", {
-    description: "Scan session storage usage (count, size, top largest)",
+    description: "Scan session usage (supports --global and --sort size|lru)",
     handler: async (args, ctx) => {
-      const parsed = parseScanScope(args);
+      const parsed = parseScanArgs(args);
 
       if (!parsed.isScanCommand) {
-        ctx.ui.notify("Unknown subcommand. Use /session-retention scan [--global]", "warning");
+        ctx.ui.notify("Unknown subcommand. Use /session-retention scan [--global] [--sort size|lru]", "warning");
         return;
       }
 
@@ -386,7 +449,7 @@ export default function sessionRetentionExtension(pi: ExtensionAPI): void {
         return;
       }
 
-      await runScan(pi, ctx, parsed.scope);
+      await runScan(pi, ctx, parsed.scope, parsed.sort);
     },
   });
 }
