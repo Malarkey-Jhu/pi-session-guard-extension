@@ -105,19 +105,19 @@ In cleanup list:
 
 ### 1) See current storage usage (`/session-guard scan`)
 
-![Scan overview](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/scan.png)
+![Scan overview](https://cdn.jsdelivr.net/gh/Malarkey-Jhu/pi-session-guard-extension@main/docs/images/scan.png)
 
 ### 2) Preview a session before deleting (`p` in cleanup list)
 
-![Cleanup preview](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/clean-preview.png)
+![Cleanup preview](https://cdn.jsdelivr.net/gh/Malarkey-Jhu/pi-session-guard-extension@main/docs/images/clean-preview.png)
 
 ### 3) Multi-select and delete in one cleanup run
 
-![Cleanup multi-select](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/clean.png)
+![Cleanup multi-select](https://cdn.jsdelivr.net/gh/Malarkey-Jhu/pi-session-guard-extension@main/docs/images/clean.png)
 
 ### 4) Quota exceeded blocks normal chat input
 
-![Quota exceeded guard](https://raw.githubusercontent.com/Malarkey-Jhu/pi-session-guard-extension/main/docs/images/quota-exceed.png)
+![Quota exceeded guard](https://cdn.jsdelivr.net/gh/Malarkey-Jhu/pi-session-guard-extension@main/docs/images/quota-exceed.png)
 
 ---
 
